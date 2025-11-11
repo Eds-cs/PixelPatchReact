@@ -1,4 +1,4 @@
-// Route paths used throughout the application
+
 export const ROUTES = {
   HOME: '/',
   DASHBOARD: '/dashboard',
