@@ -1,10 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-// Main component
-export default function App() {
-  return <ClientRepairDone />;
-}
-
 // Converted Page Component
 function ClientRepairDone() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -260,7 +255,7 @@ function ClientRepairDone() {
                 <div className="border-t border-gray-200 pt-3">
                   <div className="flex justify-between text-base">
                     <span className="font-semibold text-gray-900">Total Estimate:</span>
-                    <span className="font-bold text-blue-600">5,000.00 PHP</span>
+                    <span className="font-bold text-blue-600">7,000.00 PHP</span>
                   </div>
                 </div>
                 <div className="border-t border-gray-200 pt-3">
@@ -343,3 +338,5 @@ function ClientRepairDone() {
     </div>
   );
 }
+
+export default ClientRepairDone;

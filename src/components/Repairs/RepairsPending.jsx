@@ -106,7 +106,7 @@ const RepairPending = () => {
         <div className="mt-6 bg-blue-100 p-4 rounded-lg flex items-center justify-between">
           <p className="text-sm text-blue-800">
             <span className="text-2xl font-semibold">Support Center: </span>
-            <p Having issues with your p/> Having issues with your request? <a href="#" className="font-medium underline hover:text-blue-600">Contact Support</a>
+            Having issues with your request? <a href="#" className="font-medium underline hover:text-blue-600">Contact Support</a>
           </p>
         </div>
 
