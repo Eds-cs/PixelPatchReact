@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 
+// Main App component for preview
+export default function App() {
+  return <ClientRepairCompleted />;
+}
+
 // The Client Repair Completed Page Component
-export default function ClientRepairCompleted() {
+function ClientRepairCompleted() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileButtonRef = useRef(null);
   const profileDropdownRef = useRef(null);
