@@ -98,57 +98,9 @@ function ClientAiLanding() {
                 </button>
               </div>
             </div>
-
-
           </div>
         </div>
       </main>
-<<<<<<< HEAD
-
-      <footer className="bg-white border-t border-gray-200 mt-16">
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 py-16">
-            <div className="col-span-2 md:col-span-4 lg:col-span-1">
-              <a href="#" className="text-2xl font-extrabold text-blue-600">PixelPatch</a>
-              <p className="mt-3 text-sm text-gray-600">Where technology and expertise meet to bring your gadgets back to life.</p>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase">Quick Links</h3>
-              <ul className="mt-4 space-y-3">
-                <li><a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">AI Assistant</a></li>
-                <li><a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Find Service</a></li>
-                <li><a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Partner</a></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase">Company</h3>
-              <ul className="mt-4 space-y-3">
-                <li><a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">About Us</a></li>
-                <li><a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Career</a></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase">Support</h3>
-              <ul className="mt-4 space-y-3">
-                <li><a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Help Center</a></li>
-                <li><a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Privacy Policy</a></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase">Connect With Us</h3>
-              <ul className="mt-4 space-y-3">
-                <li><a href="https://www.facebook.com/profile.php?id=61583531965173" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Facebook</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-200 py-6">
-            <p className="text-center text-sm text-gray-500">&copy; 2025 PixelPatch Inc. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
-=======
->>>>>>> main
     </div>
   );
 }
