@@ -62,10 +62,6 @@ import BusinessProfile from "./components/business/BusinessProfile";
 /* ---------- CHATBOT ---------- */
 import ClientMessages from "./components/Messages";
 
-/* ---------- EXTRA FROM MAIN ---------- */
-import ClientAiLanding from "./components/HomeLoggedInAI";
-import PixelPatchLanding from "./components/HomeLoggedInAIBefore";
-
 /* ---------- BUSINESS ROUTES ---------- */
 import { businessRoutes } from "./components/business/routes";
 
