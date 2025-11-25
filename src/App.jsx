@@ -5,7 +5,7 @@ import ErrorBoundary from "./components/shared/ErrorBoundary";
 import AppLayout from "./components/shared/AppLayout";
 
 /* ---------- MAIN PAGES ---------- */
-import Home from "./components/Home"; // Your AI Landing Page
+import Home from "./components/Home";
 import Login from "./components/Login";
 import SignUp from "./components/SignUp";
 import Services from "./components/Services";
@@ -34,6 +34,7 @@ import RepairAccepted from "./components/Repairs/RepairsAccepted";
 import RepairInProgress from "./components/Repairs/RepairsInProgress";
 import RepairDone from "./components/Repairs/RepairsDone";
 import ClientRepairCompleted from "./components/Repairs/RepairsCompleted";
+import ClientPaymentDetailsModal from "./components/Repairs/PaymentDetailsModal";
 
 /* ---------- SHOP ---------- */
 import ShopCreateVoucher from "./components/Shop/CreateVoucher";
@@ -61,8 +62,13 @@ import BusinessProfile from "./components/business/BusinessProfile";
 /* ---------- CHATBOT ---------- */
 import ClientMessages from "./components/Messages";
 
+/* ---------- EXTRA FROM MAIN ---------- */
+import ClientAiLanding from "./components/HomeLoggedInAI";
+import PixelPatchLanding from "./components/HomeLoggedInAIBefore";
+
 /* ---------- BUSINESS ROUTES ---------- */
 import { businessRoutes } from "./components/business/routes";
+
 const {
   Repairs: BusinessRepairs,
   RepairDetails,
@@ -109,6 +115,7 @@ function App() {
             {/* ---------- USER FEATURES ---------- */}
             <Route path={ROUTES.CLIENT_BOOKING} element={<ClientBooking />} />
             <Route path={ROUTES.CLIENT_REPAIR_REQUEST_MODAL} element={<ClientRepairRequestModalPage />} />
+            <Route path={ROUTES.CLIENT_PAYMENT_DETAILS_MODAL} element={<ClientPaymentDetailsModal />} />
             <Route path={ROUTES.EMAIL_VERIFY} element={<EmailVerifyPage />} />
             <Route path={ROUTES.REGISTRATION_POPUP} element={<RegistrationPopUp />} />
             <Route path={ROUTES.REVIEW_MODAL} element={<ReviewModalOnly />} />

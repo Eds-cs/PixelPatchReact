@@ -1,134 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
-
-// Main App component for preview
-export default function App() {
-  return <ClientRepairCompleted />;
-}
+import React from 'react';
 
 // The Client Repair Completed Page Component
 function ClientRepairCompleted() {
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const profileButtonRef = useRef(null);
-  const profileDropdownRef = useRef(null);
-
-  // Effect to handle clicking outside the dropdown
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (
-        isProfileOpen &&
-        profileButtonRef.current &&
-        !profileButtonRef.current.contains(event.target) &&
-        profileDropdownRef.current &&
-        !profileDropdownRef.current.contains(event.target)
-      ) {
-        setIsProfileOpen(false);
-      }
-    }
-    document.addEventListener('click', handleClickOutside);
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-    };
-  }, [isProfileOpen]);
 
   return (
     <div className="bg-gray-50 text-gray-900 flex flex-col min-h-screen" style={{ fontFamily: "'Inter', sans-serif" }}>
-      
-      {/* 1. Header Navigation */}
-      <header className="border-b border-gray-200 bg-white w-full flex-shrink-0 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center justify-between h-20">
-            
-            {/* Logo */}
-            <div className="flex-shrink-0">
-              <a href="#" className="text-2xl font-extrabold text-blue-600">
-                PixelPatch
-              </a>
-            </div>
-
-            {/* Navigation Links (Desktop) */}
-            <div className="hidden md:block">
-              <div className="ml-10 flex items-baseline space-x-6">
-                <a href="#" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Home</a>
-                <a href="#" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">AI Assistant</a>
-                <a href="#" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Services</a>
-                <a href="#" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Become a Partner</a>
-              </div>
-            </div>
-
-            {/* Icons (Desktop) */}
-            <div className="hidden md:flex items-center space-x-4">
-              {/* Notification Icon */}
-              <button className="text-gray-500 hover:text-blue-600 rounded-full p-2 transition-colors">
-                <span className="sr-only">Notifications</span>
-                <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-                </svg>
-              </button>
-              {/* Chat Icon */}
-              <button className="text-gray-500 hover:text-blue-600 rounded-full p-2 transition-colors">
-                <span className="sr-only">Messages</span>
-                <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76v-1.503c0-.858.694-1.553 1.553-1.553h.002c.859 0 1.554.695 1.554 1.553v1.503A1.553 1.553 0 013.805 14.313H3.803A1.553 1.553 0 012.25 12.76zm3.003-1.503v1.503c0 .858.695 1.553 1.553 1.553h.002c.859 0 1.554-.695 1.554-1.553v-1.503c0-.858-.695-1.553-1.554-1.553h-.002a1.553 1.553 0 00-1.553 1.553zm3.004v1.503c0 .858.695 1.553 1.553 1.553h.002c.859 0 1.554-.695 1.554-1.553v-1.503c0-.858-.695-1.553-1.554-1.553h-.002a1.553 1.553 0 00-1.553 1.553zm10.493-1.553h-.002a1.553 1.553 0 00-1.553 1.553v1.503c0 .858.694 1.553 1.553 1.553h.002c.859 0 1.553-.695 1.553-1.553v-1.503c0-.858-.694-1.553-1.553-1.553zM9.75 12c0-.858.695-1.553 1.554-1.553h.002c.859 0 1.553.695 1.553 1.553v1.503c0 .858-.694 1.553-1.553 1.553h-.002c-.859 0-1.554-.695-1.554-1.553V12zm3.003 0v1.503c0 .858.695 1.553 1.553 1.553h.002c.859 0 1.554-.695 1.554-1.553V12c0-.858-.695-1.553-1.554-1.553h-.002a1.553 1.553 0 00-1.553 1.553z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 19.5v2.25c0 .621.504 1.125 1.125 1.125h.375c.621 0 1.125-.504 1.125-1.125V19.5m-3.375 0v2.25c0 .621.504 1.125 1.125 1.125h.375c.621 0 1.125-.504 1.125-1.125V19.5m-3.375 0h3.375m-3.375 0v-1.5c0-1.036.84-1.875 1.875-1.875h.375c1.036 0 1.875.84 1.875 1.875v1.5m-3.375 0h3.375M9 19.5v2.25c0 .621.504 1.125 1.125 1.125h.375c.621 0 1.125-.504 1.125-1.125V19.5m-3.375 0v2.25c0 .621.504 1.125 1.125 1.125h.375c.621 0 1.125-.504 1.125-1.125V19.5m-3.375 0h3.375m-3.375 0v-1.5c0-1.036.84-1.875 1.875-1.875h.375c1.036 0 1.875.84 1.875 1.875v1.5m-3.375 0h3.375M4.5 19.5v2.25c0 .621.504 1.125 1.125 1.125h.375c.621 0 1.125-.504 1.125-1.125V19.5m-3.375 0v2.25c0 .621.504 1.125 1.125 1.125h.375c.621 0 1.125-.504 1.125-1.125V19.5m-3.375 0h3.375m-3.375 0v-1.5c0-1.036.84-1.875 1.875-1.875h.375c1.036 0 1.875.84 1.875 1.875v1.5m-3.375 0h3.375" />
-                </svg>
-              </button>
-              
-              {/* Profile Avatar */}
-              <div className="relative">
-                <button 
-                  ref={profileButtonRef}
-                  onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="flex items-center justify-center h-10 w-10 rounded-full overflow-hidden border-2 border-gray-200 hover:border-blue-500 transition-colors"
-                >
-                  <span className="sr-only">Open user menu</span>
-                  <img className="h-full w-full object-cover" src="https://placehold.co/40x40/e0f2fe/3b82f6?text=U&font=inter" alt="User avatar" />
-                </button>
-                
-                {/* Profile Dropdown */}
-                {isProfileOpen && (
-                  <div ref={profileDropdownRef} className="absolute right-0 mt-2 w-64 origin-top-right rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
-                    <div className="py-1" role="none">
-                      <div className="flex items-center px-4 py-3 border-b border-gray-200">
-                        <img className="h-10 w-10 rounded-full" src="https://placehold.co/40x40/dbeafe/1e40af?text=JD&font=inter" alt="User Avatar" />
-                        <div className="ml-3">
-                          <p className="text-sm font-semibold text-gray-900">John Doe</p>
-                          <p className="text-sm text-gray-500">johndoe@gmail.com</p>
-                        </div>
-                      </div>
-                      <div className="py-1">
-                        <a href="#" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
-                        <a href="#" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">Repairs</a>
-                        <a href="#" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">Devices</a>
-                        <a href="#" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">AI Assistant</a>
-                      </div>
-                      <div className="py-1 border-t border-gray-200">
-                        <a href="#" className="block px-4 py-3 text-sm text-blue-600 hover:bg-gray-100">Switch to Business</a>
-                      </div>
-                      <div className="py-1 border-t border-gray-200">
-                        <a href="#" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
-                        <a href="#" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">Help</a>
-                      </div>
-                      <div className="py-1 border-t border-gray-200">
-                        <a href="#" className="block px-4 py-3 text-sm text-red-600 hover:bg-gray-100">Log Out</a>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <div className="-mr-2 flex md:hidden">
-              <button className="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500">
-                <span className="sr-only">Open main menu</span>
-                <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
-                </svg>
-              </button>
-            </div>
-          </nav>
-        </div>
-      </header>
 
       {/* 2. Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow">
@@ -311,7 +187,7 @@ function ClientRepairCompleted() {
                 <div className="border-t border-gray-200 pt-3">
                   <div className="flex justify-between text-base">
                     <span className="font-semibold text-gray-900">Total Estimate:</span>
-                    <span className="font-bold text-blue-600">5,000.00 PHP</span>
+                    <span className="font-bold text-blue-600">7,000.00 PHP</span>
                   </div>
                 </div>
                 <div className="border-t border-gray-200 pt-3">
@@ -383,10 +259,10 @@ function ClientRepairCompleted() {
                       </div>
                       <div className="flex items-center gap-3">
                           <span className="text-sm text-gray-600">23</span>
-                          <button className="text-gray-500 hover:text-blue-600">
+                          <button className="bg-white text-gray-500 hover:text-blue-600 border-gray-500">
                               <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6.633 10.5c.8-1.03 1.9-1.8 3.1-2.2v1.1c-1 .4-1.8.9-2.4 1.5L6.6 10.5zM17.4 10.5c.8-1.03 1.9-1.8 3.1-2.2v1.1c-1 .4-1.8.9-2.4 1.5L17.4 10.5zM12 3a9 9 0 00-9 9c0 4.97 4.03 9 9 9s9-4.03 9-9c0-4.97-4.03-9-9-9zm-1.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm6 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" /></svg>
                           </button>
-                          <button className="text-gray-500 hover:text-gray-900">
+                          <button className="bg-white text-gray-500 hover:text-gray-900 border-gray-500">
                               <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" /></svg>
                           </button>
                       </div>
@@ -401,15 +277,19 @@ function ClientRepairCompleted() {
         </div>
 
         {/* Support Center Banner */}
-        <div className="mt-6 bg-blue-100 p-4 rounded-lg flex items-center justify-between">
-          <p className="text-sm text-blue-800">
-            <span className="font-semibold">Support Center:</span>
-            Having issues with your request?{' '}
-            <a href="#" className="font-medium underline hover:text-blue-600">
-              Contact Support
-            </a>
-          </p>
-        </div>
+        <div className="mt-6 bg-blue-100 p-4 rounded-lg">
+        <p className="text-sm text-blue-800 font-semibold">
+          Support Center:
+        </p>
+
+        <p className="text-sm text-blue-800">
+          Having issues with your request?{" "}
+          <a href="#" className="font-medium underline hover:text-blue-600">
+            Contact Support
+          </a>
+        </p>
+      </div>
+
 
         {/* Action Buttons */}
         {/* Removed as per "Completed" state in requirements, usually no actions left */}
@@ -522,3 +402,5 @@ function ClientRepairCompleted() {
     </div>
   );
 }
+
+export default ClientRepairCompleted;

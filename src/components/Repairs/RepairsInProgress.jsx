@@ -1,35 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
-
-// Main component
-export default function App() {
-  return <ClientRepairInProgress />;
-}
+import React from 'react';
 
 // Converted Page Component
 function ClientRepairInProgress() {
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const profileButtonRef = useRef(null);
-  const profileDropdownRef = useRef(null);
-
-  // Effect to handle clicking outside the dropdown
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (
-        isProfileOpen &&
-        profileButtonRef.current &&
-        !profileButtonRef.current.contains(event.target) &&
-        profileDropdownRef.current &&
-        !profileDropdownRef.current.contains(event.target)
-      ) {
-        setIsProfileOpen(false);
-      }
-    }
-
-    document.addEventListener('click', handleClickOutside);
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-    };
-  }, [isProfileOpen]);
 
   return (
     <div className="bg-gray-50 text-gray-900 flex flex-col min-h-screen" style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -263,7 +235,7 @@ function ClientRepairInProgress() {
                 <div className="border-t border-gray-200 pt-3">
                   <div className="flex justify-between text-base">
                     <span className="font-semibold text-gray-900">Total Estimate:</span>
-                    <span className="font-bold text-blue-600">5,000.00 PHP</span>
+                    <span className="font-bold text-blue-600">7,000.00 PHP</span>
                   </div>
                 </div>
                 <div className="border-t border-gray-200 pt-3">
@@ -337,3 +309,5 @@ function ClientRepairInProgress() {
     </div>
   );
 }
+
+export default ClientRepairInProgress;

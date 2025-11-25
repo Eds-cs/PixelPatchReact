@@ -95,9 +95,13 @@ const RepairPending = () => {
             <div>
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Reference Images</h2>
               <div className="flex flex-wrap gap-4">
-                {request.images.map((src, i) => (
-                  <img key={i} src={src} alt={`ref-${i}`} className="w-24 h-24 rounded-lg object-contain border border-gray-200 bg-white p-1" />
-                ))}
+                {request.images && request.images.length > 0 ? (
+                  request.images.map((src, i) => (
+                    <img key={i} src={src} alt={`ref-${i}`} className="w-24 h-24 rounded-lg object-contain border border-gray-200 bg-white p-1" />
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-500">No images available</p>
+                )}
               </div>
             </div>
           </div>
@@ -106,7 +110,7 @@ const RepairPending = () => {
         <div className="mt-6 bg-blue-100 p-4 rounded-lg flex items-center justify-between">
           <p className="text-sm text-blue-800">
             <span className="text-2xl font-semibold">Support Center: </span>
-            <p Having issues with your p/> Having issues with your request? <a href="#" className="font-medium underline hover:text-blue-600">Contact Support</a>
+            Having issues with your request? <a href="#" className="font-medium underline hover:text-blue-600">Contact Support</a>
           </p>
         </div>
 
