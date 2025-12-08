@@ -33,9 +33,9 @@ const ProfileDropdown = ({ isOpen }) => {
         {/* Links Section 1 */}
         <div className="py-1">
           <Link to="/profile" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">Profile</Link>
-          <Link to="/repairs" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">Repairs</Link>
+          {/* <Link to="/repairs" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">Repairs</Link>
           <Link to="/devices" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">Devices</Link>
-          <Link to="/ai-assistant" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">AI Assistant</Link>
+          <Link to="/ai-assistant" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">AI Assistant</Link> */}
         </div>
 
         {/* Links Section 2 */}

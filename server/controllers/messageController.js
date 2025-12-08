@@ -1,54 +1,114 @@
 import db from "../config/db.js";
 
-// Start conversation or return existing one
+/*
+===========================================
+   START CHAT (OR RETURN EXISTING)
+===========================================
+*/
 export const startConversation = (req, res) => {
-  const user1 = req.user.id;
-  const { otherUser } = req.body;
+  const client_id = req.user.id;
+  const { request_id, shop_id } = req.body;
 
-  const checkSql = `
-    SELECT * FROM conversations 
-    WHERE (user_one = ? AND user_two = ?)
-    OR (user_one = ? AND user_two = ?)
+  if (!shop_id) {
+    return res.status(400).json({ error: "shop_id required" });
+  }
+
+  const findSql = `
+    SELECT *
+    FROM chats
+    WHERE client_id = ? AND shop_id = ?
     LIMIT 1
   `;
 
-  db.query(checkSql, [user1, otherUser, otherUser, user1], (err, result) => {
-    if (err) return res.status(500).json({ error: err });
-
-    if (result.length > 0) {
-      return res.json({ conversation_id: result[0].id });
+  db.query(findSql, [client_id, shop_id], (err, results) => {
+    if (err) {
+      console.log("DB ERROR startConversation:", err);
+      return res.status(500).json({ error: "Database error" });
     }
 
-    const createSql = `INSERT INTO conversations (user_one, user_two) VALUES (?, ?)`;
-    db.query(createSql, [user1, otherUser], (err, result) => {
-      if (err) return res.status(500).json({ error: err });
+    if (results.length > 0) {
+      return res.json(results[0]); // existing chat
+    }
 
-      return res.json({ conversation_id: result.insertId });
+    const createSql = `
+      INSERT INTO chats 
+        (client_id, shop_id, started_at, last_message_at, is_active)
+      VALUES (?, ?, NOW(), NOW(), 1)
+    `;
+
+    db.query(createSql, [client_id, shop_id], (err2, result2) => {
+      if (err2) {
+        console.log("DB ERROR createChat:", err2);
+        return res.status(500).json({ error: "Database error" });
+      }
+
+      return res.json({
+        id: result2.insertId,
+        client_id,
+        shop_id,
+        started_at: new Date(),
+        last_message_at: new Date(),
+        is_active: 1
+      });
     });
   });
 };
 
-// Send a message
+/*
+===========================================
+   SEND MESSAGE
+===========================================
+*/
 export const sendMessage = (req, res) => {
-  const sender = req.user.id;
-  const { conversation_id, message } = req.body;
+  const sender_id = req.user.id;
+  const { chat_id, message_text } = req.body;
 
-  const sql = `INSERT INTO messages (conversation_id, sender_id, message) VALUES (?, ?, ?)`;
+  if (!chat_id || !message_text) {
+    return res.status(400).json({ error: "chat_id and message_text required" });
+  }
 
-  db.query(sql, [conversation_id, sender, message], (err) => {
-    if (err) return res.status(500).json({ error: err });
-    res.json({ success: true });
+  const sql = `
+    INSERT INTO chat_messages
+      (chat_id, sender_id, message_text, is_read, timestamp)
+    VALUES (?, ?, ?, 0, NOW())
+  `;
+
+  db.query(sql, [chat_id, sender_id, message_text], (err, result) => {
+    if (err) {
+      console.log("DB ERROR sendMessage:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+
+    db.query(`UPDATE chats SET last_message_at = NOW() WHERE id = ?`, [chat_id]);
+
+    return res.json({
+      success: true,
+      message_id: result.insertId
+    });
   });
 };
 
-// Load conversation messages
+/*
+===========================================
+   GET ALL MESSAGES FOR CHAT
+===========================================
+*/
 export const getMessages = (req, res) => {
   const { id } = req.params;
 
   const sql = `
-    SELECT * FROM messages 
-    WHERE conversation_id = ?
-    ORDER BY created_at ASC
+    SELECT 
+      m.id,
+      m.chat_id,
+      m.sender_id,
+      m.message_text,
+      m.timestamp,
+      u.first_name,
+      u.last_name
+    FROM chat_messages m
+    JOIN users u ON u.id = m.sender_id
+    WHERE m.chat_id = ?
+    ORDER BY m.timestamp ASC
   `;
 
   db.query(sql, [id], (err, rows) => {
@@ -57,14 +117,33 @@ export const getMessages = (req, res) => {
   });
 };
 
-// List conversations for logged in user
+/*
+===========================================
+   GET ALL CHATS FOR LOGGED-IN USER
+===========================================
+*/
 export const getUserConversations = (req, res) => {
   const userId = req.user.id;
 
   const sql = `
-    SELECT * FROM conversations
-    WHERE user_one = ? OR user_two = ?
-    ORDER BY created_at DESC
+    SELECT 
+      c.id,
+      c.client_id,
+      c.shop_id,
+      c.last_message_at,
+
+      client.first_name AS client_first,
+      client.last_name AS client_last,
+
+      s.name AS shop_name,
+      s.user_id AS shop_owner_id
+
+    FROM chats c
+    JOIN users client ON client.id = c.client_id
+    JOIN shops s ON s.id = c.shop_id
+
+    WHERE c.client_id = ? OR s.user_id = ?
+    ORDER BY c.last_message_at DESC
   `;
 
   db.query(sql, [userId, userId], (err, rows) => {
@@ -72,3 +151,6 @@ export const getUserConversations = (req, res) => {
     res.json(rows);
   });
 };
+
+
+

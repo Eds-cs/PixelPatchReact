@@ -15,6 +15,10 @@ export const ROUTES = {
     REVIEW: '/shops/review',
     SERVICE: '/shops/service',
   },
+
+  CHAT: "/chat/:shopId",
+  CHAT_LIST: '/chat',
+  CHAT_ID: '/chat/:chatId',
   
   PROFILE: '/profile',
   LOGIN: '/login',

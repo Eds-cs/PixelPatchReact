@@ -9,7 +9,8 @@ const ProfileDropdown = ({ isOpen }) => {
     JSON.parse(localStorage.getItem("user")) ||
     JSON.parse(sessionStorage.getItem("user"));
 
-  const isBusiness = user?.role === "business";
+  // ✅ BUSINESS USER CHECK (role_id === 3)
+  const isBusiness = user?.role_id === 3;
 
   const handleLogout = () => {
     localStorage.clear();
@@ -39,12 +40,12 @@ const ProfileDropdown = ({ isOpen }) => {
       {/* LINKS */}
       <div className="py-1">
         <Link to={ROUTES.PROFILE} className="block px-4 py-3 hover:bg-gray-100">Profile</Link>
-        <Link to={ROUTES.REPAIRS} className="block px-4 py-3 hover:bg-gray-100">Repairs</Link>
+        {/* <Link to={ROUTES.REPAIRS} className="block px-4 py-3 hover:bg-gray-100">Repairs</Link>
         <Link to={ROUTES.DEVICES} className="block px-4 py-3 hover:bg-gray-100">Devices</Link>
-        <Link to="/ai-assistant" className="block px-4 py-3 hover:bg-gray-100">AI Assistant</Link>
+        <Link to="/ai-assistant" className="block px-4 py-3 hover:bg-gray-100">AI Assistant</Link> */}
       </div>
 
-      {/* BUSINESS REGISTRATION */}
+      {/* BUSINESS SECTION */}
       <div className="border-t py-1">
         {!isBusiness ? (
           <Link
@@ -73,7 +74,7 @@ const ProfileDropdown = ({ isOpen }) => {
       <div className="border-t py-1">
         <button
           onClick={handleLogout}
-          className=" bg-white w-full text-left px-4 py-3 text-red-600 hover:bg-gray-100"
+          className="w-full bg-white text-left px-4 py-3 text-red-600 hover:bg-gray-100"
         >
           Log Out
         </button>

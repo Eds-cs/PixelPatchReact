@@ -11,7 +11,8 @@ const ShopProfile = () => {
   // If coming from Messages.jsx
   const shopFromState = location.state?.shop || null;
 
-  const [shop, setShop] = useState(shopFromState);
+  const [shop, setShop] = useState(null);
+
   const [services, setServices] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [documents, setDocuments] = useState([]);
@@ -26,9 +27,11 @@ const ShopProfile = () => {
   useEffect(() => {
     if (!id) return;
 
-    // If we already have the shop from state (Messages recommendation),
-    // skip fetching it from DB.
-    if (shop) return;
+    // If shop was passed via link state (Chat button)
+    if (shopFromState) {
+      setShop(shopFromState);
+      return;
+    }
 
     setLoadingShop(true);
     setError(null);
@@ -47,8 +50,8 @@ const ShopProfile = () => {
         setError("Failed to load shop.");
       })
       .finally(() => setLoadingShop(false));
-  }, [id, shop]);
-
+  }, [id]);
+  console.log("FINAL SHOP =", shop);
   /* -----------------------------------------------------------
      FETCH EXTRAS — services, reviews, documents
   ----------------------------------------------------------- */
@@ -82,7 +85,7 @@ const ShopProfile = () => {
   ----------------------------------------------------------- */
   if (loadingShop) return <div className="p-6">Loading shop...</div>;
   if (error) return <div className="p-6 text-red-600">{error}</div>;
-  if (!shop) return <div className="p-6">Shop not found.</div>;
+  if (!shop) return null;
 
   /* -----------------------------------------------------------
      HELPERS
@@ -98,6 +101,8 @@ const ShopProfile = () => {
   ]
     .filter(Boolean)
     .join(", ");
+    console.log("shopFromLink =", shopFromState);
+    console.log("shop_id I'm sending =", shopFromState?.id);
 
   /* -----------------------------------------------------------
      UI STARTS HERE
@@ -156,16 +161,16 @@ const ShopProfile = () => {
 
               {/* BUTTONS */}
               <div className="flex flex-col sm:flex-row gap-3 mt-4 md:mt-0 md:mb-2">
-                <Link
-                  to="/client-repair-request-modal"
-                  state={{ shop }}
-                  className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Book Service
-                </Link>
+              <Link
+                to="/client-repair-request-modal"
+                state={{ shop_id: shop?.id }}
+                className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Book Service
+              </Link>
 
                 <Link
-                  to="/messages"
+                  to={`/chat?shopId=${shop.id}`}
                   state={{ shop }}
                   className="px-5 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >

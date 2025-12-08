@@ -1,3 +1,4 @@
+// business/BusinessServices.jsx
 import React, { useState, useEffect, useRef } from 'react';
 
 // Main component to render the page
@@ -97,49 +98,6 @@ function ShopServices() {
 
       {/* 2. Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <header className="bg-white border-b border-gray-200 p-4 h-20 flex-shrink-0">
-          <div className="flex justify-end items-center h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center space-x-4">
-              {/* Notification Icon */}
-              <button className="text-gray-500 hover:text-blue-600 rounded-full p-2 transition-colors">
-                <span className="sr-only">Notifications</span>
-                <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-                </svg>
-              </button>
-              {/* Chat Icon */}
-              <button className="text-gray-500 hover:text-blue-600 rounded-full p-2 transition-colors">
-                <span className="sr-only">Messages</span>
-                <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76v-1.503c0-.858.694-1.553 1.553-1.553h.002c.859 0 1.554.695 1.554 1.553v1.503A1.553 1.553 0 013.805 14.313H3.803A1.553 1.553 0 012.25 12.76zm3.003-1.503v1.503c0 .858.695 1.553 1.553 1.553h.002c.859 0 1.554-.695 1.554-1.553v-1.503c0-.858-.695-1.553-1.554-1.553h-.002a1.553 1.553 0 00-1.553 1.553zm3.004v1.503c0 .858.695 1.553 1.553 1.553h.002c.859 0 1.554-.695 1.554-1.553v-1.503c0-.858-.695-1.553-1.554-1.553h-.002a1.553 1.553 0 00-1.553 1.553zm10.493-1.553h-.002a1.553 1.553 0 00-1.553 1.553v1.503c0 .858.694 1.553 1.553 1.553h.002c.859 0 1.553-.695 1.553-1.553v-1.503c0-.858-.694-1.553-1.553-1.553zM9.75 12c0-.858.695-1.553 1.554-1.553h.002c.859 0 1.553.695 1.553 1.553v1.503c0 .858-.694 1.553-1.553 1.553h-.002c-.859 0-1.554-.695-1.554-1.553V12zm3.003 0v1.503c0 .858.695 1.553 1.553 1.553h.002c.859 0 1.554-.695 1.554-1.553V12c0-.858-.695-1.553-1.554-1.553h-.002a1.553 1.553 0 00-1.553 1.553z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 19.5v2.25c0 .621.504 1.125 1.125 1.125h.375c.621 0 1.125-.504 1.125-1.125V19.5m-3.375 0v2.25c0 .621.504 1.125 1.125 1.125h.375c.621 0 1.125-.504 1.125-1.125V19.5m-3.375 0h3.375m-3.375 0v-1.5c0-1.036.84-1.875 1.875-1.875h.375c1.036 0 1.875.84 1.875 1.875v1.5m-3.375 0h3.375M9 19.5v2.25c0 .621.504 1.125 1.125 1.125h.375c.621 0 1.125-.504 1.125-1.125V19.5m-3.375 0v2.25c0 .621.504 1.125 1.125 1.125h.375c.621 0 1.125-.504 1.125-1.125V19.5m-3.375 0h3.375m-3.375 0v-1.5c0-1.036.84-1.875 1.875-1.875h.375c1.036 0 1.875.84 1.875 1.875v1.5m-3.375 0h3.375M4.5 19.5v2.25c0 .621.504 1.125 1.125 1.125h.375c.621 0 1.125-.504 1.125-1.125V19.5m-3.375 0v2.25c0 .621.504 1.125 1.125 1.125h.375c.621 0 1.125-.504 1.125-1.125V19.5m-3.375 0h3.375m-3.375 0v-1.5c0-1.036.84-1.875 1.875-1.875h.375c1.036 0 1.875.84 1.875 1.875v1.5m-3.375 0h3.375" />
-                </svg>
-              </button>
-              {/* Profile Avatar */}
-              <div className="relative">
-                <button ref={profileButtonRef} onClick={() => setIsProfileOpen(!isProfileOpen)} className="flex items-center justify-center h-10 w-10 rounded-full overflow-hidden border-2 border-gray-200 hover:border-blue-500 transition-colors">
-                  <span className="sr-only">Open user menu</span>
-                  <img className="h-full w-full object-cover" src="https://placehold.co/40x40/e0f2fe/3b82f6?text=U&font=inter" alt="User avatar" />
-                </button>
-                {/* Profile Dropdown */}
-                <div ref={profileDropdownRef} className={`${isProfileOpen ? 'block' : 'hidden'} absolute right-0 mt-2 w-64 origin-top-right rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50`}>
-                  <div className="py-1" role="none">
-                    <div className="flex items-center px-4 py-3 border-b border-gray-200">
-                      <img className="h-10 w-10 rounded-full" src="https://placehold.co/40x40/dbeafe/1e40af?text=JD&font=inter" alt="User Avatar" />
-                      <div className="ml-3">
-                        <p className="text-sm font-semibold text-gray-900">John Doe</p>
-                        <p className="text-sm text-gray-500">johndoe@gmail.com</p>
-                      </div>
-                    </div>
-                    <div className="py-1"><a href="#" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">Profile</a><a href="#" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">Settings</a><a href="#" className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">Help</a></div>
-                    <div className="py-1 border-t border-gray-200"><a href="#" className="block px-4 py-3 text-sm text-red-600 hover:bg-gray-100">Log Out</a></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </header>
-
         {/* Page Content */}
         <main className="p-8 flex-grow">
           {/* Service Type Section */}

@@ -1,3 +1,4 @@
+// shared/AppLayout.jsx
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 import { useState, useEffect, useRef } from "react";
@@ -26,7 +27,7 @@ const AppLayout = ({ children }) => {
   const isLoggedIn = Boolean(token);
 
   // Determine if footer should be hidden
-  const hideFooterRoutes = ["/messages", "/ai-assistant", "/"];
+  const hideFooterRoutes = ["/messages", "/ai-assistant", "/","/login", "/signup", "/account-sign-up","/chat", "/chat/:shopId","/chat/:chatId"];
   const shouldHideFooter = hideFooterRoutes.includes(location.pathname);
 
   useEffect(() => {
@@ -65,13 +66,15 @@ const AppLayout = ({ children }) => {
               <div className="hidden md:block">
                 <div className="ml-4 flex items-center space-x-4">
 
-                  <button className="bg-white text-gray-500 hover:text-blue-600 rounded-full p-2">
+                  {/* <button className="bg-white text-gray-500 hover:text-blue-600 rounded-full p-2">
                     <Bell className="w-6 h-6" />
-                  </button>
+                  </button> */}
 
-                  <button className="bg-white text-gray-500 hover:text-blue-600 rounded-full p-2">
-                    <MessageCircle className="w-6 h-6" />
-                  </button>
+                  <Link to={ROUTES.CHAT_LIST}>
+                    <button className="bg-white text-gray-500 hover:text-blue-600 rounded-full p-2">
+                      <MessageCircle className="w-6 h-6" />
+                    </button>
+                  </Link>
 
                   <div ref={dropdownRef}>
                     <UserAvatar

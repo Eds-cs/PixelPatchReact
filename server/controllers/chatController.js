@@ -1,10 +1,9 @@
-import db from "../config/db.js";
-
 export const startChat = (req, res) => {
-  const { client_id, shop_id } = req.body;
+  const client_id = req.user.id;   // ⬅️ authenticated user
+  const { shop_id } = req.body;
 
-  if (!client_id || !shop_id)
-    return res.status(400).json({ error: "client_id and shop_id required" });
+  if (!shop_id)
+    return res.status(400).json({ error: "shop_id required" });
 
   // check existing chat
   const checkSql = `
@@ -23,7 +22,6 @@ export const startChat = (req, res) => {
       return res.json({ chat: existing[0] });
     }
 
-    // create new chat
     const now = new Date();
 
     const insertSql = `

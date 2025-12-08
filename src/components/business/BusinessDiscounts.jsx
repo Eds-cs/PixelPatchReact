@@ -1,3 +1,4 @@
+// business/BusinessDiscounts.jsx
 import React, { useState, useRef, useEffect } from 'react';
 
 // Main App component for preview

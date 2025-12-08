@@ -14,6 +14,9 @@ import ShopProfile from "./components/ShopProfile";
 import UserProfile from "./components/UserProfile";
 import AccountSignUp from "./components/AccountSignUp";
 
+import ChatPage from "./components/chat/ChatPage.jsx";
+
+
 /* ---------- BUSINESS SIGNUP ---------- */
 import BusinessSignUpPg1 from "./components/business/BusinessSignUpPg1";
 import BusinessSignUpPg2 from "./components/business/BusinessSignUpPg2";
@@ -94,8 +97,13 @@ function App() {
             <Route path={ROUTES.HOME} element={<Home />} />
             <Route path="/ai" element={<Home />} />
 
-            {/* ---------- MESSAGING / AI ---------- */}
+            {/* ---------- AI ---------- */}
             <Route path={ROUTES.MESSAGES} element={<ClientMessages />} />
+
+            {/* ---------- Chat Page ---------- */}
+            <Route path={ROUTES.CHAT_LIST} element={<ChatPage />} />
+
+
 
             {/* ---------- GENERAL PAGES ---------- */}
             <Route path={ROUTES.SERVICES} element={<Services />} />

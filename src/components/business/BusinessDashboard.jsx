@@ -1,3 +1,4 @@
+// business/BusinessDashboard.jsx
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
@@ -159,7 +160,7 @@ const BusinessDashboard = () => {
             <li className="pt-2">
               <span className="px-4 text-xs font-semibold uppercase text-gray-500">Request</span>
             </li>
-            {['Repair', 'Services', 'Discounts', 'Reviews'].map((item, index) => (
+            {['Repairs', 'Services', 'Discounts', 'Reviews'].map((item, index) => (
               <li key={item}>
                 <Link 
                   to={`/business/${item.toLowerCase()}`} 
