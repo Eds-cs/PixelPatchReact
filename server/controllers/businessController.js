@@ -2,167 +2,282 @@
 import db from "../config/db.js";
 import { resolveShopIdForUser } from "./repairController.js";
 
+
+// Register a new business/shop
+
 export const registerBusiness = async (req, res) => {
+  const userId = req.user.id;
+
+  const {
+    business_name,
+    business_email,
+    business_phone,
+    region,
+    province,
+    city,
+    barangay,
+    street,
+    postal_code,
+    days_from,
+    days_to,
+    open_time,
+    close_time,
+    services,
+    payment
+  } = req.body;
+
   try {
-    const userId = req.user.id; // from JWT
-
-    const {
-      business_name,
-      business_email,
-      business_phone,
-      region,
-      province,
-      city,
-      barangay,
-      street,
-      postal_code,
-      reg_first_name,
-      reg_middle_name,
-      reg_last_name,
-      days_from,
-      days_to,
-      open_time,
-      close_time,
-      primary_doc,
-      gov_id,
-      services,
-      payment_method,
-      account_name,
-      account_number,
-      tin
-    } = req.body;
-
-    // -------------------------------
-    // 1. Save address
-    // -------------------------------
-    const addressSql = `
-      INSERT INTO addresses (region, province, city, barangay, street, postal_code)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `;
-
-    const addressValues = [
-      region, province, city, barangay, street, postal_code
-    ];
-
-    const addressResult = await new Promise((resolve, reject) => {
-      db.query(addressSql, addressValues, (err, result) => {
-        if (err) reject(err);
-        else resolve(result);
+    // --------------------------------------------------
+    // 1. HARD VALIDATION — BUSINESS INFO
+    // --------------------------------------------------
+    if (
+      !business_name ||
+      !business_email ||
+      !business_phone ||
+      !region ||
+      !province ||
+      !city ||
+      !barangay ||
+      !street ||
+      !days_from ||
+      !days_to ||
+      !open_time ||
+      !close_time
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Business information is incomplete"
       });
-    });
-
-    const addressId = addressResult.insertId;
-
-    // -------------------------------
-    // 2. Save shop
-    // -------------------------------
-    const shopSql = `
-      INSERT INTO shops 
-      (user_id, name, description, address_id, phone_number, email, days_from, days_to, open_time, closing_time, is_verified)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-
-    const shopValues = [
-      userId,
-      business_name,
-      "Pending business",
-      addressId,
-      business_phone,
-      business_email,
-      days_from,
-      days_to,
-      open_time,
-      close_time,
-      0
-    ];
-
-    const shopResult = await new Promise((resolve, reject) => {
-      db.query(shopSql, shopValues, (err, result) => {
-        if (err) reject(err);
-        else resolve(result);
-      });
-    });
-
-    const shopId = shopResult.insertId;
-
-    // -------------------------------
-    // 3. Insert shop services (SAFE CATEGORY)
-    // -------------------------------
-    if (!Array.isArray(services)) {
-      throw new Error("Services must be an array");
     }
 
-    for (let svc of services) {
-      if (!svc) continue;
+    // --------------------------------------------------
+    // 2. HARD VALIDATION — SERVICES
+    // --------------------------------------------------
+    if (!Array.isArray(services) || services.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "At least one service is required"
+      });
+    }
 
-      const category = (svc.category || "").toString().toUpperCase();
-      const repairService = svc.repair_service || "Undefined Service";
-      const price = parseFloat(svc.price || 0);
-      const timeframe = `${svc.time_from || "0"}-${svc.time_to || "0"} ${svc.time_unit || "hours"}`;
-
-      const serviceSql = `
-        INSERT INTO shop_services 
-        (shop_id, name, category, description, base_price, estimated_timeframe, accepts_pickup, accepts_onsite, accepts_dropoff, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, 0, 0, 1, NOW(), NOW())
-      `;
-
-      const serviceVals = [
-        shopId,
-        repairService,
-        category,
-        "Business submitted service",
-        price,
-        timeframe
-      ];
-
-      await new Promise((resolve, reject) => {
-        db.query(serviceSql, serviceVals, (err) => {
-          if (err) reject(err);
-          else resolve();
+    for (const svc of services) {
+      if (
+        !svc.category ||
+        !svc.repair_service ||
+        !svc.price ||
+        isNaN(parseFloat(svc.price)) ||
+        parseFloat(svc.price) <= 0 ||
+        !svc.time_from ||
+        !svc.time_to ||
+        !svc.time_unit
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid service data"
         });
+      }
+    }
+
+    // --------------------------------------------------
+    // 3. HARD VALIDATION — PAYMENT
+    // --------------------------------------------------
+    if (
+      !payment ||
+      !payment.payment_method ||
+      !payment.account_name ||
+      !payment.account_number ||
+      payment.terms !== true ||
+      payment.privacy !== true
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Payment information is incomplete"
       });
     }
 
-    // -------------------------------
-    // 4. Insert payout info (SAFE PAYMENT METHOD)
-    // -------------------------------
-    const safeMethod = (payment_method || "").toString().toUpperCase();
-
-    const payoutSql = `
-      INSERT INTO shop_payouts 
-      (shop_id, method, account_name, account_number, status)
-      VALUES (?, ?, ?, ?, ?)
-    `;
-
-    const payoutValues = [
-      shopId,
-      safeMethod,
-      account_name || "",
-      account_number || "",
-      "PENDING"
-    ];
-
-    await new Promise((resolve, reject) => {
-      db.query(payoutSql, payoutValues, (err) => {
-        if (err) reject(err);
-        else resolve();
-      });
+    // --------------------------------------------------
+    // 4. BLOCK DUPLICATE SHOP
+    // --------------------------------------------------
+    const existingShop = await new Promise((resolve, reject) => {
+      db.query(
+        "SELECT id FROM shops WHERE user_id = ? LIMIT 1",
+        [userId],
+        (err, rows) => (err ? reject(err) : resolve(rows))
+      );
     });
 
-    // -------------------------------
-    // SUCCESS
-    // -------------------------------
-    return res.json({
-      message: "Business registration submitted successfully!",
-      shop_id: shopId
+    if (existingShop.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "User already has a registered shop"
+      });
+    }
+
+    // --------------------------------------------------
+    // 5. TRANSACTION — ALL OR NOTHING
+    // --------------------------------------------------
+    db.beginTransaction((err) => {
+      if (err) {
+        console.error("❌ TX start error:", err);
+        return res.status(500).json({ message: "Transaction error" });
+      }
+
+      (async () => {
+        try {
+          // -----------------------------
+          // ADDRESS INSERT
+          // -----------------------------
+          const addressResult = await new Promise((resolve, reject) => {
+            db.query(
+              `
+              INSERT INTO addresses (
+                user_id,
+                country,
+                region,
+                province,
+                city,
+                barangay,
+                street,
+                postal_code,
+                latitude,
+                longitude,
+                created_at,
+                updated_at
+              )
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+              `,
+              [
+                userId,
+                "",                 // country placeholder
+                region,
+                province,
+                city,
+                barangay,
+                street,
+                postal_code || null,
+                0.0,               // latitude placeholder
+                0.0                // longitude placeholder
+              ],
+              (err, result) => (err ? reject(err) : resolve(result))
+            );
+          });
+
+          const addressId = addressResult.insertId;
+
+          // -----------------------------
+          // SHOP INSERT
+          // -----------------------------
+          const shopResult = await new Promise((resolve, reject) => {
+            db.query(
+              `
+              INSERT INTO shops (
+                user_id,
+                name,
+                description,
+                address_id,
+                phone_number,
+                email,
+                open_time,
+                closing_time,
+                days_from,
+                days_to,
+                is_verified,
+                rating_average,
+                current_customer_count,
+                created_at,
+                updated_at
+              )
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+              `,
+              [
+                userId,
+                business_name,
+                "Business profile created",
+                addressId,
+                business_phone,
+                business_email,
+                open_time,
+                close_time,
+                days_from,
+                days_to,
+                0,        // is_verified
+                0.00,     // rating_average (initial)
+                0
+              ],
+              (err, result) => (err ? reject(err) : resolve(result))
+            );
+          });
+
+          const shopId = shopResult.insertId;
+
+          // -----------------------------
+          // SERVICES INSERT
+          // -----------------------------
+          for (const svc of services) {
+            await new Promise((resolve, reject) => {
+              db.query(
+                `
+                INSERT INTO shop_services (
+                  shop_id,
+                  name,
+                  category,
+                  description,
+                  base_price,
+                  estimated_timeframe,
+                  accepts_pickup,
+                  accepts_onsite,
+                  accepts_dropoff,
+                  created_at,
+                  updated_at
+                )
+                VALUES (?, ?, ?, ?, ?, ?, 0, 0, 1, NOW(), NOW())
+                `,
+                [
+                  shopId,
+                  svc.repair_service,
+                  svc.category.toUpperCase(),
+                  "Registered service",
+                  parseFloat(svc.price),
+                  `${svc.time_from}-${svc.time_to} ${svc.time_unit}`
+                ],
+                (err) => (err ? reject(err) : resolve())
+              );
+            });
+          }
+
+          // -----------------------------
+          // COMMIT
+          // -----------------------------
+          db.commit((err) => {
+            if (err) {
+              db.rollback(() => {
+                console.error("❌ TX commit error:", err);
+                return res.status(500).json({ message: "Registration failed" });
+              });
+              return;
+            }
+
+            return res.json({
+              success: true,
+              message: "Business registered successfully",
+              shop_id: shopId
+            });
+          });
+
+        } catch (txErr) {
+          db.rollback(() => {
+            console.error("❌ registerBusiness TX error:", txErr);
+            return res.status(500).json({ message: "Registration failed" });
+          });
+        }
+      })();
     });
 
   } catch (err) {
-    console.log(err);
-    return res.status(500).json({ error: err.message });
+    console.error("❌ registerBusiness error:", err);
+    return res.status(500).json({ message: "Server error" });
   }
 };
-
 
 // =====================================================
 // GET BUSINESS SHOP FOR LOGGED-IN USER

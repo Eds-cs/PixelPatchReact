@@ -9,11 +9,13 @@ dotenv.config();
 
 import chatRoutes from "./routes/chat.js";
 import businessRoutes from "./routes/businessRoutes.js";
+import businessDashboardRoutes from "./routes/businessDashboardRoutes.js";
 import userRoutes from "./routes/users.js";
 import authRoutes from "./routes/auth.js";
 import otpRoutes from "./routes/otp.js";
 import uploadRoutes from "./routes/upload.js";
 import aiRouter from "./routes/ai.js";
+import aiHistoryRoutes from "./routes/aiHistoryRoutes.js";
 import shopRoutes from "./routes/shops.js";
 import servicesRoutes from "./routes/services.js";
 import reviewsRoutes from "./routes/reviews.js";
@@ -80,6 +82,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/auth", otpRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/ai", aiRouter);
+app.use("/api/ai", aiHistoryRoutes);
 
 // ROUTE for PROFILES
 app.use("/api/user/devices", userDevicesRoutes);
@@ -104,6 +107,8 @@ app.use("/api/business/repairs", repairRoutes);
 
 // BUSINESS EMPLOYEE ROUTES
 app.use("/api/business", employeeRoutes);
+// BUSINESS DASHBOARD ROUTES
+app.use("/api/business", businessDashboardRoutes);
 
 // BUSINESS PAYMENT ROUTES
 app.use("/api/business", paymentRoutes);

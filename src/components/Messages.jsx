@@ -1,67 +1,199 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
-
 export default function ClientMessages() {
+  /* ======================================================
+     CORE CHAT STATE
+  ====================================================== */
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [conversations, setConversations] = useState([]);
+  const [sidebarLoading, setSidebarLoading] = useState(false);
+  const [activeConversationId, setActiveConversationId] = useState(null);
 
-  // Shops UI State
-  const [shopsToShow, setShopsToShow] = useState([]); 
-  const [recommendedShops, setRecommendedShops] = useState([]); 
+
+
+  // Conversation control
+  const [conversationId, setConversationId] = useState(null);
+
+  /* ======================================================
+     SHOP UI STATE (UNCHANGED INTENT)
+  ====================================================== */
+  const [shopsToShow, setShopsToShow] = useState([]);
+  const [recommendedShops, setRecommendedShops] = useState([]);
   const [shopsHidden, setShopsHidden] = useState(false);
 
-  // Load initial issue
+  // Prevent duplicate auto-send
+  const initialIssueSentRef = useRef(false);
+
+  /* ======================================================
+     AUTH HEADER (REQUIRED)
+  ====================================================== */
+  const authHeader = () => ({
+    Authorization: `Bearer ${
+      localStorage.getItem("token") ||
+      sessionStorage.getItem("token") ||
+      ""
+    }`,
+  });
+
+  const loadConversations = async () => {
+    console.group("🧪 loadConversations");
+
+    try {
+      setSidebarLoading(true);
+
+      const res = await axios.get(
+        "http://localhost:5000/api/ai/conversations",
+        { headers: authHeader() }
+      );
+
+      console.log("Raw sidebar API response:", res.data);
+      console.log("Is array?", Array.isArray(res.data));
+      console.log("Conversation count:", res.data?.length);
+
+      if (Array.isArray(res.data)) {
+        res.data.forEach((c, i) => {
+          console.log(`Conversation[${i}]`, c);
+        });
+      }
+
+      setConversations(res.data || []);
+
+
+    } catch (err) {
+      console.error("❌ Failed to load conversations", err);
+    } finally {
+      setSidebarLoading(false);
+      console.groupEnd();
+    }
+  };
+
+    /* ======================================================
+     AUTO-LOAD INITIAL ISSUE (UNCHANGED UX)
+  ====================================================== */
   useEffect(() => {
     const issue = sessionStorage.getItem("initial_ai_issue");
-    if (issue) {
+    if (issue && !initialIssueSentRef.current) {
+      initialIssueSentRef.current = true;
+      if (!conversationId) return;
       sendMessage(issue);
       sessionStorage.removeItem("initial_ai_issue");
     }
   }, []);
 
-  // -------------------------------------------------
-  // SEND MESSAGE
-  // -------------------------------------------------
-  const sendMessage = async (text) => {
-    if (!text.trim()) return;
+  // load chat history if conversationId changes
+  useEffect(() => {
+    loadConversations();
+  }, []);
 
-    // Clear shops immediately for new request
+  const openConversation = async (convId) => {
+    if (convId === conversationId) return;
+    try {
+      setLoading(true);
+      setConversationId(convId);
+      setActiveConversationId(convId);
+      setShopsHidden(true);
+      setShopsToShow([]);
+      setRecommendedShops([]);
+      
+      const res = await axios.get(
+        `http://localhost:5000/api/ai/conversations/${convId}/messages`,
+        { headers: authHeader() }
+      );
+      console.log("📨 Loading messages for conversation:", convId);
+      console.log("📨 🧠 AI analyze response::", res.data);
+      console.log("📦 Is array?", Array.isArray(res.data));
+      console.log("📦 Message count:", res.data?.length);
+      console.log("🧪 First raw message object:", res.data[0]);
+      const formatted = res.data.map((m) => ({
+        sender: m.sender,
+        text: m.text,
+      }));
+      console.log("🧨 setMessages", formatted)
+      setMessages(formatted);
+    } catch (err) {
+      console.error("Failed to open conversation", err);
+    } finally {
+      setLoading(false);
+    }
+    
+  };
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const startNewChat = () => {
+    setConversationId(null);
+    setActiveConversationId(null);
+    setMessages([]);
     setShopsToShow([]);
+    setShopsHidden(true);
+    setInput("");
+  };
+
+  /* ======================================================
+     SEND MESSAGE (FULLY REBUILT, SAME FLOW)
+  ====================================================== */
+  const sendMessage = async (text) => {
+    if (!text.trim() || loading) return;
+
+    // Reset shop UI safely for a new intent
+    setShopsHidden(true);
+    setShopsToShow([]);
+    setRecommendedShops([]);
 
     const userMsg = { sender: "user", text };
-    const newHistory = [...messages, userMsg];
-
-    setMessages(newHistory);
+    setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:5000/api/ai/analyze", {
-        text,
-        history: newHistory,
-      });
+      const res = await axios.post(
+        "http://localhost:5000/api/ai/analyze",
+        {
+          text,
+          conversation_id: conversationId || null,
+        },
+        { headers: authHeader() }
+      );
 
-      const { reply, shops } = res.data;
+      const { reply, shops = [], conversation_id } = res.data;
 
-      // Add AI reply to messages
-      setMessages((prev) => [...prev, { sender: "ai", text: reply }]);
+      /* ----------------------------------------------
+        🔑 CRITICAL: Persist conversation + refresh sidebar
+      ---------------------------------------------- */
+      if (!conversationId && conversation_id) {
+        setConversationId(conversation_id);
+        loadConversations(); // ✅ THIS WAS MISSING
+      }
 
-      // ---- HANDLE SHOPS FROM BACKEND ----
+      // Append AI reply
+      if (reply) {
+        setMessages((prev) => [...prev, { sender: "ai", text: reply }]);
+      }
+      console.log("📨 Raw messages API:", res.data);
+      /* ----------------------------------------------
+        SHOP HANDLING (UNCHANGED UX)
+      ---------------------------------------------- */
       if (Array.isArray(shops) && shops.length > 0) {
         const formatted = shops.map((s) => ({
           id: s.id,
           name: s.name ?? "Unnamed Shop",
-          rating_average: s.rating_average ?? "N/A",
-          address: s.address ? String(s.address).trim() : "Unknown",
+          rating_average:
+            typeof s.rating_average === "number"
+              ? s.rating_average.toFixed(1)
+              : "N/A",
+          address: s.address?.trim() || "Unknown",
           raw: s,
         }));
 
-        // Show shop list after a 1-second delay
         setTimeout(() => {
-          setShopsHidden(false); // Unhide shop section
+          setShopsHidden(false); // reveal only AFTER AI decides
           setShopsToShow(formatted);
           setRecommendedShops(formatted.slice(0, 3));
         }, 1000);
@@ -72,46 +204,184 @@ export default function ClientMessages() {
 
       setMessages((prev) => [
         ...prev,
-        { sender: "ai", text: "⚠️ The AI could not process your request. Try again." },
+        {
+          sender: "ai",
+          text: "⚠️ The AI could not process your request. Please try again.",
+        },
       ]);
-
     } finally {
       setLoading(false);
     }
   };
 
+  
   const handleSend = () => sendMessage(input);
 
-  // -------------------------------------------------
-  // UI
-  // -------------------------------------------------
+  // Delete conversation handler
+  const handleDelete = async (convId) => {
+  if (!window.confirm("Delete this conversation?")) return;
+
+  try {
+    await axios.delete(
+      `http://localhost:5000/api/ai/conversations/${convId}`,
+      { headers: authHeader() }
+    );
+
+    // Remove from UI
+    setConversations(prev =>
+      prev.filter(c => c.id !== convId)
+    );
+
+    // If deleting currently open one
+    if (convId === activeConversationId) {
+      startNewChat();
+    }
+
+  } catch (err) {
+    console.error("Failed to delete conversation", err);
+    alert("Could not delete conversation");
+  }
+  };
+  // Rename conversation handler
+  const handleRename = async (convId) => {
+    const newTitle = prompt("Enter new conversation name:");
+
+    if (!newTitle || !newTitle.trim()) return;
+
+    try {
+      const res = await axios.put(
+        `http://localhost:5000/api/ai/conversations/${convId}/rename`,
+        { newTitle },
+        { headers: authHeader() }
+      );
+
+      const updatedTitle = res.data.title;
+
+      // IMMEDIATELY update sidebar state
+      setConversations(prev =>
+        prev.map(c =>
+          c.id === convId
+            ? { ...c, title: updatedTitle }
+            : c
+        )
+      );
+
+    } catch (err) {
+      console.error("Failed to rename conversation", err);
+      alert("Could not rename conversation");
+    }
+  };
+
+
+  
+  /* ======================================================
+     UI
+  ====================================================== */
   return (
     <div className="bg-white flex flex-col h-full overflow-hidden text-gray-900">
       <main className="w-full flex-1 flex h-full min-h-0">
 
-        {/* -------------------- SIDEBAR -------------------- */}
-        <div className="w-full md:w-1/3 lg:w-1/4 border-r border-gray-200 flex flex-col min-h-0">
-          <div className="p-4 border-b">
-            <h1 className="text-2xl font-bold mb-4">Chat</h1>
+    {/* -------------------- SIDEBAR -------------------- */}
+    <div className="w-full md:w-80 lg:w-96 border-r flex flex-col">
 
-            <div className="relative flex items-center">
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-full pl-3 pr-10 py-2 border rounded-md text-sm"
-              />
-              <div className="absolute right-2 text-gray-500 text-xs pointer-events-none">
-                All
-              </div>
-            </div>
-          </div>
+      {/* HEADER WITH NEW CHAT BUTTON */}
+      <div className="p-4 border-b flex justify-between items-center">
+        <h2 className="font-bold text-lg">Chats</h2>
 
-          <div className="flex-1 overflow-y-auto min-h-0">
-            <p className="text-gray-400 text-sm p-4">
-              Your chats will show here soon.
-            </p>
-          </div>
-        </div>
+        <button
+          onClick={startNewChat}
+          className="px-3 py-1 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+        >
+          + New Chat
+        </button>
+      </div>
+
+      {/* CONVERSATION LIST */}
+      <div className="flex-1 overflow-y-auto">
+        {sidebarLoading ? (
+          <p className="text-gray-400 text-sm p-4">Loading chats…</p>
+        ) : conversations.length === 0 ? (
+          <p className="text-gray-400 text-sm p-4">
+            No conversations yet.
+          </p>
+        ) : (
+          <ul className="divide-y">
+            {conversations.map((conv) => (
+              <li
+                key={conv.id}
+                className={`px-4 py-3 flex justify-between items-center cursor-pointer hover:bg-gray-100 ${
+                  activeConversationId === conv.id ? "bg-gray-100" : ""
+                }`}
+                onClick={() => {
+                  setActiveConversationId(conv.id);
+                  openConversation(conv.id);
+                }}
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-800 truncate">
+                    {conv.title || "New Chat"}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {new Date(conv.updated_at).toLocaleString()}
+                  </p>
+                </div>
+
+                {/* ACTION BUTTONS */}
+                <div className="flex gap-2 ml-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRename(conv.id);
+                    }}
+                    className="text-xs text-blue-500 bg-white hover:text-blue-700"
+                  >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="2"
+                    stroke="currentColor"
+                    className="h-5 w-5"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M16.862 3.487a2.25 2.25 0 013.182 3.182L8.25 18.463l-4.5 1.125 1.125-4.5L16.862 3.487z"
+                    />
+                  </svg>
+                  </button>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(conv.id);
+                    }}
+                    className="text-xs text-red-500 bg-white hover:text-red-700"
+                  >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="2"
+                    stroke="currentColor"
+                    className="h-5 w-5"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 7h12M9 7V4h6v3m2 0v11a2 2 0 01-2 2H9a2 2 0 01-2-2V7h10z"
+                    />
+                  </svg>
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+    </div>
+
 
         {/* -------------------- CHAT AREA -------------------- */}
         <div className="flex-1 flex flex-col bg-gray-50 overflow-hidden min-h-0">
@@ -138,15 +408,16 @@ export default function ClientMessages() {
             ))}
 
             {loading && (
-              <div className="text-gray-500 text-sm">AI is thinking...</div>
+              <div className="text-gray-500 text-sm">
+                AI is thinking…
+              </div>
             )}
           </div>
 
           {/* ---------------- SHOP CARDS ---------------- */}
           {!shopsHidden && shopsToShow.length > 0 && (
-            <div className="mt-4">
+            <div className="mt-4 px-6">
 
-              {/* Header + Close */}
               <div className="flex justify-between items-center mb-2">
                 <h2 className="text-lg font-semibold text-gray-700">
                   Recommended Repair Shops
@@ -154,13 +425,12 @@ export default function ClientMessages() {
 
                 <button
                   onClick={() => setShopsHidden(true)}
-                  className="text-sm text-gray-500 bg-white hover:text-gray-700 flex items-center gap-1"
+                  className="text-sm text-gray-500 bg-gray-100 hover:text-gray-700"
                 >
                   ✕ Close
                 </button>
               </div>
 
-              {/* Cards */}
               <div className="flex space-x-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-gray-400">
                 {shopsToShow.map((shop, i) => (
                   <div
@@ -178,9 +448,10 @@ export default function ClientMessages() {
                     <p className="text-xs text-gray-500 mt-1">
                       📍 {shop.address}
                     </p>
+
                     <Link
                       to={`/shops/${shop.id}`}
-                      state={{ shop }}   // <-- passes full shop object
+                      state={{ shop: shop.raw }}
                       className="mt-3 block w-full bg-blue-500 hover:bg-blue-600 text-white text-sm py-2 rounded-lg text-center"
                     >
                       View Shop
@@ -200,10 +471,12 @@ export default function ClientMessages() {
                 onKeyDown={(e) => e.key === "Enter" && handleSend()}
                 placeholder="Explain your situation..."
                 className="w-full pr-14 pl-4 py-3 rounded-lg bg-gray-200 text-sm"
+                disabled={loading}
               />
 
               <button
                 onClick={handleSend}
+                disabled={loading}
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-gray-200 rounded-full"
               >
                 <svg
@@ -223,6 +496,7 @@ export default function ClientMessages() {
               </button>
             </div>
           </div>
+
         </div>
       </main>
     </div>

@@ -134,6 +134,24 @@ export default function BusinessSignUpPageOne() {
       primary_doc: form.primary_doc.value,
       gov_id: form.gov_id.value,
     };
+    if (
+      !data.business_name ||
+      !data.business_email ||
+      !data.business_phone ||
+      !data.region ||
+      !data.province ||
+      !data.city ||
+      !data.barangay ||
+      !data.street ||
+      !data.days_from ||
+      !data.days_to ||
+      !data.open_time ||
+      !data.close_time
+    ) {
+      alert("Please complete all required fields before continuing.");
+      return;
+    }
+
 
     // Save to localStorage
     localStorage.setItem("businessSignup", JSON.stringify(data));
@@ -330,6 +348,9 @@ export default function BusinessSignUpPageOne() {
                 <option>SEC Certificate</option>
               </select>
               <FileUpload fileType="PDF Only" />
+              <p className="text-xs text-gray-500 mt-2">
+                Documents will be reviewed after registration.
+              </p>
             </div>
 
             <div>

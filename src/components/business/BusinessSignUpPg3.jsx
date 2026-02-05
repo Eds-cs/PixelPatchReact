@@ -1,4 +1,5 @@
 import React from 'react';
+import { useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../constants/routes';
 import axios from "axios";
@@ -77,7 +78,21 @@ function Stepper({ currentStep }) {
 
 // Page Three Component
 function BusinessSignUpPageThree() {
+  
   const navigate = useNavigate();
+  useEffect(() => {
+    const data = JSON.parse(localStorage.getItem("businessSignup"));
+    if (
+      !data ||
+      !data.business_name ||
+      !data.region ||
+      !Array.isArray(data.services) ||
+      data.services.length === 0
+    ) {
+      alert("Complete previous registration steps first.");
+      navigate(ROUTES.BUSINESS_SIGNUP.STEP1);
+    }
+  }, [navigate]);
 
   const handleBack = () => {
     navigate(ROUTES.BUSINESS_SIGNUP.STEP2);
@@ -101,6 +116,16 @@ function BusinessSignUpPageThree() {
       privacy: form.privacy.checked,
     };
 
+    if (
+      !form.payment_method.value ||
+      !form.account_name.value ||
+      !form.account_number.value ||
+      !form.terms.checked ||
+      !form.privacy.checked
+    ) {
+      alert("Complete all payment and agreement fields.");
+      return;
+    }
     // 3️⃣ Merge final data
     const finalData = {
       ...savedData,
@@ -122,14 +147,19 @@ function BusinessSignUpPageThree() {
       );
 
 
-      console.log("BACKEND RESPONSE:", response.data);
+      console.log("BACKEND RESPONSE:", response.data)
+      if (response.data.success) {
+        localStorage.removeItem("businessSignup");
+        navigate(ROUTES.BUSINESS_SIGNUP.STEP4);
+      }
+
 
       // 5️⃣ Navigate to review screen
       navigate(ROUTES.BUSINESS_SIGNUP.STEP4);
 
     } catch (err) {
       console.error("REGISTRATION ERROR:", err);
-      alert("Failed to register. Check backend.");
+      alert(err.response?.data?.message || "Registration failed.");
     }
   };
 
@@ -241,7 +271,7 @@ function BusinessSignUpPageThree() {
               type="submit"
               className="px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
             >
-              Continue
+              Submit Registration
             </button>
           </div>
 

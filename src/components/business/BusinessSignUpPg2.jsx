@@ -136,6 +136,14 @@ function ServiceBlock({ id, index, onRemove, categories }) {
 /* ---------------- MAIN PAGE ---------------- */
 export default function BusinessSignUpPageTwo() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const data = localStorage.getItem("businessSignup");
+    if (!data) {
+      alert("Complete business information first.");
+      navigate(ROUTES.BUSINESS_SIGNUP.STEP1);
+    }
+  }, [navigate]);
   const [categories, setCategories] = useState([]);
 
   const [serviceBlocks, setServiceBlocks] = useState([
@@ -147,7 +155,9 @@ export default function BusinessSignUpPageTwo() {
     axios
       .get("http://localhost:5000/api/shop-services/categories")
       .then((res) => setCategories(res.data.categories))
-      .catch((err) => console.error("CATEGORY FETCH ERROR:", err));
+      .catch(() => {
+        alert("Unable to load service categories. Try again later.");
+      });
   }, []);
 
   /* Add new block */
@@ -180,10 +190,32 @@ export default function BusinessSignUpPageTwo() {
       };
     });
 
+    const filteredServices = services.filter(
+      s => s.repair_service && s.price
+    );
+
     const updated = {
       ...savedData,
-      services,
+      services: filteredServices
     };
+
+    if (!serviceBlocks.length) {
+      alert("At least one service is required.");
+      return;
+    }
+
+    for (const svc of services) {
+      if (
+        !svc.repair_service ||
+        !svc.price ||
+        isNaN(parseFloat(svc.price)) ||
+        parseFloat(svc.price) <= 0
+      ) {
+        alert("Each service must have a name and a valid price.");
+        return;
+      }
+    }
+
 
     localStorage.setItem("businessSignup", JSON.stringify(updated));
 
@@ -213,11 +245,15 @@ export default function BusinessSignUpPageTwo() {
         </button>
 
         <div className="flex justify-end gap-4 pt-6 border-t border-gray-300">
-          <button type="button" className="px-6 py-3 border rounded-lg" onClick={() => navigate(ROUTES.BUSINESS_SIGNUP.STEP1)}>
-            Back
-          </button>
+            <button type="button" className="px-6 py-3 border rounded-lg" onClick={() => navigate(ROUTES.BUSINESS_SIGNUP.STEP1)}>
+              Back
+            </button>
 
-          <button type="submit" className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          <button
+            type="submit"
+            disabled={!categories.length}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg disabled:opacity-50"
+          >
             Continue
           </button>
         </div>

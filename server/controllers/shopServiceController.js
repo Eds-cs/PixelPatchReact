@@ -1,6 +1,8 @@
 // server/controllers/shopServiceController.js
 import db from "../config/db.js";
 
+
+
 export const getServiceCategories = (req, res) => {
   const sql = `
     SELECT COLUMN_TYPE 
